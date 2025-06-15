@@ -1,25 +1,55 @@
 const axios = require('axios');
+const dotenv = require('dotenv');
+
+dotenv.config();
 
 class ProxyService {
-  async forwardRequest(targetUrl, method, headers, body) {
-    try {
-      // Remove proxy-specific headers
-      const cleanHeaders = { ...headers };
-      delete cleanHeaders.host;
-      delete cleanHeaders['content-length'];
-      delete cleanHeaders['target-url'];
 
+  async handler(targetUrl, method, headers, body) {
+    if (targetUrl.includes('https://api.coingecko.com')) {
+      return this.coingecko(targetUrl, method, headers, body);
+    }
+    if (targetUrl.includes('https://api.etherscan.io')) { 
+      return this.etherscan(targetUrl, method, headers, body);
+    }
+    return this.forwardRequest(targetUrl, method, headers, body);
+  }
+
+  async coingecko(targetUrl, method, headers, body) {
+    const response = await axios({
+      method,
+      url: targetUrl,
+      headers: {
+        ...headers,
+        'x-cg-demo-api-key': process.env.COINGECKO_API_KEY
+      },
+      data: body
+    });
+    return response;
+  }
+
+  async etherscan(targetUrl, method) {
+    const response = await axios({
+      method,
+      url: targetUrl,
+      query: {
+        'x-api-key': process.env.ETHERSCAN_API_KEY
+      },
+    });
+    return response;
+  }
+
+  async forwardRequest(targetUrl, method) {
+    console.log('targetUrl', targetUrl);
+    console.log('method', method);
+    try {
       const response = await axios({
         method,
         url: targetUrl,
-        headers: cleanHeaders,
-        data: body,
-        validateStatus: () => true // Accept all status codes
+        validateStatus: () => true,
       });
-
       return {
         status: response.status,
-        headers: response.headers,
         data: response.data
       };
     } catch (error) {

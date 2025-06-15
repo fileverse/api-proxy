@@ -4,49 +4,48 @@ const authMiddleware = require('../middlewares/auth');
 const cacheService = require('../services/cache');
 const proxyService = require('../services/proxy');
 
-router.post('/', authMiddleware, async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const targetUrl = req.headers['target-url'];
-    if (!targetUrl) {
-      return res.status(400).json({ error: 'Target-URL header is required' });
+    const method = req.headers['method'];
+    if (!targetUrl || !method) {
+      return res.status(400).json({ error: 'Target-URL and method headers are required' });
     }
 
-    // Generate cache key
-    const cacheKey = cacheService.generateCacheKey(
-      req.method,
-      targetUrl,
-      req.body
-    );
 
-    // Check cache
-    const cachedResponse = await cacheService.get(cacheKey);
-    if (cachedResponse) {
-      return res
-        .status(cachedResponse.status)
-        .set(cachedResponse.headers)
-        .json(cachedResponse.data);
-    }
+    // // Generate cache key
+    // const cacheKey = cacheService.generateCacheKey(
+    //   req.method,
+    //   targetUrl,
+    //   req.body
+    // );
+
+    // // Check cache
+    // const cachedResponse = await cacheService.get(cacheKey);
+    // if (cachedResponse) {
+    //   return res
+    //     .status(cachedResponse.status)
+    //     .set(cachedResponse.headers)
+    //     .json(cachedResponse.data);
+    // }
 
     // Forward request
     const response = await proxyService.forwardRequest(
       targetUrl,
-      req.method,
-      req.headers,
-      req.body
+      method,
     );
 
     // Cache successful responses
-    if (response.status === 200) {
-      await cacheService.set(cacheKey, response);
-    }
+    // if (response.status === 200) {
+    //   await cacheService.set(cacheKey, response);
+    // }
 
     // Track usage
-    await cacheService.incrementUserUsage(req.user.token);
+    // await cacheService.incrementUserUsage(req.user.token);
 
     // Send response
     return res
       .status(response.status)
-      .set(response.headers)
       .json(response.data);
   } catch (error) {
     console.error('Proxy route error:', error);

@@ -40,7 +40,7 @@ class ProxyService {
   async etherscan(targetUrl, method) {
     const response = await axios({
       method,
-      url: `${targetUrl}&apikey=${process.env.ETHERSCAN_API_KEY}`,
+      url: `${targetUrl}&apiKey=${process.env.ETHERSCAN_API_KEY}`,
     });
     return response;
   }
@@ -48,7 +48,7 @@ class ProxyService {
   async basescan(targetUrl, method) {
     const response = await axios({
       method,
-      url: `${targetUrl}&apikey=${process.env.BASESCAN_API_KEY}`,
+      url: `${targetUrl}&apiKey=${process.env.BASESCAN_API_KEY}`,
     });
     return response;
   }
@@ -56,7 +56,7 @@ class ProxyService {
   async gnosisscan(targetUrl, method) {
     const response = await axios({
       method,
-      url: `${targetUrl}&apikey=${process.env.GNOSISSCAN_API_KEY}`,
+      url: `${targetUrl}&apiKey=${process.env.GNOSISSCAN_API_KEY}`,
     });
     return response;
   }

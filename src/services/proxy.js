@@ -12,6 +12,12 @@ class ProxyService {
     if (targetUrl.includes('https://api.etherscan.io')) { 
       return this.etherscan(targetUrl, method, headers, body);
     }
+    if (targetUrl.includes('https://api.basescan.org')) {
+      return this.basescan(targetUrl, method, headers, body);
+    }
+    if (targetUrl.includes('https://api.gnosisscan.io')) {
+      return this.gnosisscan(targetUrl, method, headers, body);
+    }
     if (targetUrl.includes('https://openapi.firefly.land')) {
       return this.firefly(targetUrl, method, headers, body);
     }
@@ -35,6 +41,22 @@ class ProxyService {
     const response = await axios({
       method,
       url: `${targetUrl}&apikey=${process.env.ETHERSCAN_API_KEY}`,
+    });
+    return response;
+  }
+
+  async basescan(targetUrl, method) {
+    const response = await axios({
+      method,
+      url: `${targetUrl}&apikey=${process.env.BASESCAN_API_KEY}`,
+    });
+    return response;
+  }
+
+  async gnosisscan(targetUrl, method) {
+    const response = await axios({
+      method,
+      url: `${targetUrl}&apikey=${process.env.GNOSISSCAN_API_KEY}`,
     });
     return response;
   }

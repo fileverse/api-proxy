@@ -12,6 +12,9 @@ class ProxyService {
     if (targetUrl.includes('https://api.etherscan.io')) { 
       return this.etherscan(targetUrl, method, headers, body);
     }
+    if (targetUrl.includes('https://openapi.firefly.land')) {
+      return this.firefly(targetUrl, method, headers, body);
+    }
     return this.forwardRequest(targetUrl, method, headers, body);
   }
 
@@ -36,9 +39,18 @@ class ProxyService {
     return response;
   }
 
+  async firefly(targetUrl, method) {
+    const response = await axios({
+      method,
+      url: `${targetUrl}`,
+      headers: {
+        'x-api-key': process.env.FIREFLY_API_KEY
+      },
+    });
+    return response;
+  }
+
   async forwardRequest(targetUrl, method) {
-    console.log('targetUrl', targetUrl);
-    console.log('method', method);
     try {
       const response = await axios({
         method,

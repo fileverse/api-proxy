@@ -3,23 +3,32 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-class ProxyService {
+class RateLimit {
+  constructor() {
+    this.rateLimit = 1000;
+    this.resetTime = 1000;
+  }
+}
 
+class ProxyService {
   async handler(targetUrl, method, headers, body) {
     if (targetUrl.includes('https://api.coingecko.com')) {
-      return this.coingecko(targetUrl, method, headers, body);
+      return this.coingecko(targetUrl, method);
     }
-    if (targetUrl.includes('https://api.etherscan.io')) { 
-      return this.etherscan(targetUrl, method, headers, body);
+    if (targetUrl.includes('https://api.etherscan.io')) {
+      return this.etherscan(targetUrl, method);
     }
     if (targetUrl.includes('https://api.basescan.org')) {
-      return this.basescan(targetUrl, method, headers, body);
+      return this.basescan(targetUrl, method);
     }
     if (targetUrl.includes('https://api.gnosisscan.io')) {
-      return this.gnosisscan(targetUrl, method, headers, body);
+      return this.gnosisscan(targetUrl, method);
     }
     if (targetUrl.includes('https://openapi.firefly.land')) {
-      return this.firefly(targetUrl, method, headers, body);
+      return this.firefly(targetUrl, method);
+    }
+    if (targetUrl.includes('https://api.neynar.com')) {
+      return this.neynar(targetUrl, method);
     }
     return this.forwardRequest(targetUrl, method, headers, body);
   }
@@ -68,6 +77,17 @@ class ProxyService {
       url: `${targetUrl}`,
       headers: {
         'x-api-key': process.env.FIREFLY_API_KEY
+      },
+    });
+    return response;
+  }
+
+  async neynar(targetUrl, method) {
+    const response = await axios({
+      method,
+      url: `${targetUrl}`,
+      headers: {
+        'x-api-key': process.env.NEYNAR_API_KEY
       },
     });
     return response;

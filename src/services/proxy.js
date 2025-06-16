@@ -31,10 +31,7 @@ class ProxyService {
   async etherscan(targetUrl, method) {
     const response = await axios({
       method,
-      url: targetUrl,
-      query: {
-        'x-api-key': process.env.ETHERSCAN_API_KEY
-      },
+      url: `${targetUrl}&apikey=${process.env.ETHERSCAN_API_KEY}`,
     });
     return response;
   }

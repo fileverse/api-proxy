@@ -30,7 +30,7 @@ router.get('/', async (req, res) => {
     // }
 
     // Forward request
-    const response = await proxyService.forwardRequest(
+    const response = await proxyService.handler(
       targetUrl,
       method,
     );

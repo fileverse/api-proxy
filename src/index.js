@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const cors = require('cors');
 const proxyRoutes = require('./routes/proxy');
 const usageRoutes = require('./routes/usage');
 
@@ -8,6 +9,7 @@ const port = process.env.PORT || 3000;
 
 // Middleware
 app.use(express.json());
+app.use(cors());
 
 // Routes
 app.use('/proxy', proxyRoutes);

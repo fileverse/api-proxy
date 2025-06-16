@@ -60,7 +60,7 @@ class ProxyService {
       url: `${targetUrl}&apiKey=${process.env.GNOSISSCAN_API_KEY}`,
     });
     return response;
-  }d
+  }
 
   async firefly(targetUrl, method) {
     const response = await axios({

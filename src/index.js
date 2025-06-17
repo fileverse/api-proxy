@@ -13,7 +13,6 @@ const port = process.env.PORT || 3000;
 const whitelist = [
   "https://sheets.fileverse.io",
   "https://v1-sheets.fileverse.io",
-  "http://localhost:3000",
 ];
 
 // CORS configuration

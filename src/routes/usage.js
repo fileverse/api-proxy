@@ -11,8 +11,6 @@ const services = [
   'DEFILLAMA_API_KEY'
 ];
 
-
-
 router.get('/', async (req, res) => {
   try {    
     const data = {};
@@ -24,6 +22,18 @@ router.get('/', async (req, res) => {
         remaining
       };
     });
+    res.json(data);
+  } catch (error) {
+    console.error('Usage route error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.get('/id', async (req, res) => {
+  try {    
+    const data = {
+      randomId: "hello",
+    };
     res.json(data);
   } catch (error) {
     console.error('Usage route error:', error);

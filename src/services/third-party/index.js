@@ -94,16 +94,21 @@ class ThirdPartyService {
           {
             query: `
               query {
-                markets(where: { _vToken: "${input1}" }, orderBy: totalValueLockedUSD, orderDirection: desc) {
+                markets(where: { inputToken: "${input1}" }, orderBy: totalValueLockedUSD, orderDirection: desc) {
                   _vToken {
                     id
                     name
                     symbol
                   }
                   id
+                  name
+                  isActive
                   canBorrowFrom
-                  canUseAsCollateral
+                  canIsolate
                   maximumLTV
+                  canUseAsCollateral
+                  liquidationThreshold
+                  liquidationPenalty
                   totalValueLockedUSD
                 }
               }
@@ -125,12 +130,17 @@ class ThirdPartyService {
         const data = markets.map(market => {
             return {
                 id: market.id,
+                name: market.name,
+                isActive: market.isActive,
                 tokenName: market._vToken.name,
                 tokenSymbol: market._vToken.symbol,
                 canBorrowFrom: market.canBorrowFrom,
                 canUseAsCollateral: market.canUseAsCollateral,
                 maximumLTV: market.maximumLTV,
                 totalValueLockedUSD: market.totalValueLockedUSD,
+                canIsolate: market.canIsolate,
+                liquidationThreshold: market.liquidationThreshold,
+                liquidationPenalty: market.liquidationPenalty,
             }
         })
         return data;

@@ -1,34 +1,36 @@
 class ThirdPartyService {
   constructor() {}
 
-  async uniswap({ category, input1, input2 }) {
-    if (category === 'v3') {
+  async uniswap({ graphType, category, input1, input2 }) {
+    if (graphType === 'v3') {
         console.log(category, input1, input2);
     }
-    if (category === 'v3-raw') {
+    if (graphType === 'v3-raw') {
         console.log(category, input1, input2);      
     }
-    return [{ id: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48" }];
+    return [];
   }
 
-  async aave({ category, input1, input2 }) {
-    if (category === 'v2') {
-        console.log(category, input1, input2);
+  async aave({ graphType, category, input1, input2 }) {
+    if (graphType === 'v2') {
+        console.log(graphType, category, input1, input2);
     }
-    if (category === 'v2-raw') {
-        console.log(category, input1, input2);      
+    if (graphType === 'v2-raw') {
+        console.log(graphType, category, input1, input2);
     }
-    return [{ id: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48" }];
+    return [];
   }
 
-  async handler({ service, category, input1, input2 }) {
+  async handler({ service, graphType, category, input1, input2 }) {
+    console.log(service, graphType, category, input1, input2);
     let data = [];
     if (service === 'uniswap') {
-        data = await this.uniswap({ category, input1, input2 });
+        data = await this.uniswap({ graphType, category, input1, input2 });
     }
     if (service === 'aave') {
-        data = await this.aave({ category, input1, input2 });
+        data = await this.aave({ graphType, category, input1, input2 });
     }
+    console.log(data);
     return {
       status: 200,
       data: data,

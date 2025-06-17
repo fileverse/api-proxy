@@ -3,7 +3,7 @@ const router = express.Router();
 const authMiddleware = require('../middlewares/auth');
 const thirdPartyService = require('../services/third-party');
 
-router.get('/', authMiddleware, async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const { service, payload, param1, param2 } = req.query;
     if (!service || !payload) {

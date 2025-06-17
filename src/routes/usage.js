@@ -12,7 +12,7 @@ const services = [
   'DEFILLAMA_API_KEY'
 ];
 
-router.get('/', authMiddleware, async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const data = {};
     services.forEach(service => {

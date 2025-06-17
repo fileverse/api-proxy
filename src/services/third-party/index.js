@@ -87,9 +87,129 @@ class ThirdPartyService {
       }
   }
 
+  async fetchAavePoolsGraph(url, input1, input2) {
+    try {
+        const response = await axios.post(
+          url,
+          {
+            query: `
+              query {
+                markets(where: { _vToken: "${input1}" }, orderBy: totalValueLockedUSD, orderDirection: desc) {
+                  _vToken {
+                    id
+                    name
+                    symbol
+                  }
+                  id
+                  canBorrowFrom
+                  canUseAsCollateral
+                  maximumLTV
+                  totalValueLockedUSD
+                }
+              }
+            `,
+          },
+          {
+            headers: {
+              'Content-Type': 'application/json'
+            },
+          }
+        );
+    
+        if (response.data && response.data.errors) {
+          throw new Error(`GraphQL Errors: ${JSON.stringify(response.data.errors)}`);
+        }
+        console.log(response.data.data.markets)
+    
+        const { markets } = response.data && response.data.data;
+        const data = markets.map(market => {
+            return {
+                id: market.id,
+                tokenName: market._vToken.name,
+                tokenSymbol: market._vToken.symbol,
+                canBorrowFrom: market.canBorrowFrom,
+                canUseAsCollateral: market.canUseAsCollateral,
+                maximumLTV: market.maximumLTV,
+                totalValueLockedUSD: market.totalValueLockedUSD,
+            }
+        })
+        return data;
+      } catch (error) {
+        throw new Error(`GraphQL request failed: ${error.message}`);
+      }
+  }
+
+  async fetchAaveTokens(url, input1) {
+    try {
+        const response = await axios.post(
+          url,
+          {
+            query: `
+              query {
+                tokens(where: { symbol: "${input1}" }, orderBy: lastPriceUSD, orderDirection: desc) {
+                  id
+                  name
+                  symbol
+                  decimals
+                  lastPriceBlockNumber
+                  lastPriceUSD
+                  type
+                  _market {
+                    id
+                    protocol {
+                      id
+                      name
+                    }
+                    name
+                    isActive
+                  }
+                }
+              }
+            `,
+          },
+          {
+            headers: {
+              'Content-Type': 'application/json'
+            },
+          }
+        );
+    
+        if (response.data && response.data.errors) {
+          throw new Error(`GraphQL Errors: ${JSON.stringify(response.data.errors)}`);
+        }
+        console.log(response.data.data.tokens)
+   
+        const { tokens } = response.data && response.data.data;
+        const data = tokens.map(token => {
+            return {
+                id: token.id,
+                name: token.name,
+                symbol: token.symbol,
+                decimals: token.decimals,
+                lastPriceUSD: token.lastPriceUSD,
+                lastPriceBlockNumber: token.lastPriceBlockNumber,
+                type: token.type,
+                marketId: token._market.id,
+                marketName: token._market.name,
+                marketIsActive: token._market.isActive,
+                marketProtocolId: token._market.protocol.id,
+                marketProtocolName: token._market.protocol.name,
+            }
+        })
+        return data;
+      } catch (error) {
+        throw new Error(`GraphQL request failed: ${error.message}`);
+      }
+  }
+
   async aavev2(category, input1, input2) {
-    console.log(category, input1, input2)
-    return [];
+    let data = [];
+    if (category === 'markets') {
+        data = await this.fetchAavePoolsGraph(process.env.AAVE_SUBGRAPH_URL, input1, input2);
+    } else if (category === 'tokens') {
+        data = await this.fetchAaveTokens(process.env.AAVE_SUBGRAPH_URL, input1);
+    }
+    return data;
   }
 
   async uniswapv3(category, input1, input2) {

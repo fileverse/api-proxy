@@ -13,7 +13,7 @@ const services = [
 ];
 
 router.get('/', authMiddleware, async (req, res) => {
-  try {    
+  try {
     const data = {};
     services.forEach(service => {
       const used = 100;

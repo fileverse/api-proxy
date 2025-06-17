@@ -1,15 +1,20 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const proxyRoutes = require('./routes/proxy');
-const thirdPartyRoutes = require('./routes/third-party');
-const usageRoutes = require('./routes/usage');
+require("dotenv").config();
+const express = require("express");
+const cors = require("cors");
+const proxyRoutes = require("./routes/proxy");
+const thirdPartyRoutes = require("./routes/third-party");
+const usageRoutes = require("./routes/usage");
+const cacheService = require("./services/cache");
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 // Define your whitelist
-const whitelist = ['https://sheets.fileverse.io', 'https://v1-sheets.fileverse.io'];
+const whitelist = [
+  "https://sheets.fileverse.io",
+  "https://v1-sheets.fileverse.io",
+  "http://localhost:3000",
+];
 
 // CORS configuration
 const corsOptions = {
@@ -17,9 +22,9 @@ const corsOptions = {
     if (!origin || whitelist.includes(origin)) {
       callback(null, true); // allow request
     } else {
-      callback(new Error('Not allowed by CORS')); // block request
+      callback(new Error("Not allowed by CORS")); // block request
     }
-  }
+  },
 };
 
 // Middleware
@@ -27,16 +32,35 @@ app.use(express.json());
 app.use(cors(corsOptions));
 
 // Routes
-app.use('/proxy', proxyRoutes);
-app.use('/third-party', thirdPartyRoutes);
-app.use('/usage', usageRoutes);
+app.use("/proxy", proxyRoutes);
+app.use("/third-party", thirdPartyRoutes);
+app.use("/usage", usageRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({ error: 'Something went wrong!' });
+  res.status(500).json({ error: "Something went wrong!" });
 });
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`Proxy server listening on port ${port}`);
-}); 
+});
+
+// Graceful shutdown
+process.on("SIGTERM", async () => {
+  console.log("SIGTERM received, shutting down gracefully");
+  server.close(() => {
+    console.log("HTTP server closed");
+    cacheService.disconnect();
+    process.exit(0);
+  });
+});
+
+process.on("SIGINT", async () => {
+  console.log("SIGINT received, shutting down gracefully");
+  server.close(() => {
+    console.log("HTTP server closed");
+    cacheService.disconnect();
+    process.exit(0);
+  });
+});

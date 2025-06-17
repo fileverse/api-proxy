@@ -4,7 +4,7 @@ const authMiddleware = require('../middlewares/auth');
 const cacheService = require('../services/cache');
 const proxyService = require('../services/proxy');
 
-router.get('/', async (req, res) => {
+router.get('/', authMiddleware, async (req, res) => {
   try {
     const targetUrl = req.headers['target-url'];
     const method = req.headers['method'];

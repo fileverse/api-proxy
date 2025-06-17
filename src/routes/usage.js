@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const authMiddleware = require('../middlewares/auth');
 
 const services = [
   'ETHERSCAN_API_KEY',
@@ -11,7 +12,7 @@ const services = [
   'DEFILLAMA_API_KEY'
 ];
 
-router.get('/', async (req, res) => {
+router.get('/', authMiddleware, async (req, res) => {
   try {    
     const data = {};
     services.forEach(service => {

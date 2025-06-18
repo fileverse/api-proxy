@@ -33,9 +33,6 @@ class ProxyService {
     if (targetUrl.includes("https://api.safe.global")) {
       return this.safe(targetUrl, method);
     }
-    if(isDefillamaUrl(targetUrl)){
-      return this.defillama(targetUrl, method)
-    }
     return this.forwardRequest(targetUrl, method, headers, body);
   }
 

@@ -129,7 +129,6 @@ class ProxyService {
     });
     return {
       status: response.status,
-      headers: response.headers,
       data: response.data,
     };
   }

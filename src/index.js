@@ -10,9 +10,8 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // Define your whitelist
-const whitelist = [
+const whitelist = process.env.WHITELISTED_ORIGINS.split(",") || [
   "https://sheets.fileverse.io",
-  "https://v1-sheets.fileverse.io",
 ];
 
 // CORS configuration

@@ -124,7 +124,6 @@ class ProxyService {
       method,
       url: targetUrl,
       headers: {
-        ...headers,
         "Authorization": `Bearer ${process.env.SAFE_API_KEY}`,
       },
     });

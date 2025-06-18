@@ -30,6 +30,12 @@ class ProxyService {
     if (targetUrl.includes("https://api.neynar.com")) {
       return this.neynar(targetUrl, method);
     }
+    if (targetUrl.includes("https://api.safe.global")) {
+      return this.safe(targetUrl, method);
+    }
+    if(isDefillamaUrl(targetUrl)){
+      return this.defillama(targetUrl, method)
+    }
     return this.forwardRequest(targetUrl, method, headers, body);
   }
 
@@ -108,6 +114,21 @@ class ProxyService {
       url: `${targetUrl}`,
       headers: {
         "x-api-key": process.env.NEYNAR_API_KEY,
+      },
+    });
+    return {
+      status: response.status,
+      headers: response.headers,
+      data: response.data,
+    };
+  }
+  async safe(targetUrl, method) {
+    const response = await axios({
+      method,
+      url: targetUrl,
+      headers: {
+        ...headers,
+        "Authorization": `Bearer ${process.env.SAFE_API_KEY}`,
       },
     });
     return {

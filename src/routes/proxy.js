@@ -19,7 +19,6 @@ router.get("/", async (req, res) => {
       targetUrl,
       req.body
     );
-    console.log(cacheKey);
     // Check cache
     const cachedResponse = await cacheService.get(cacheKey);
     if (cachedResponse) {

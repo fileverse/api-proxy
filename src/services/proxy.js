@@ -3,13 +3,6 @@ const dotenv = require("dotenv");
 
 dotenv.config();
 
-class RateLimit {
-  constructor() {
-    this.rateLimit = 1000;
-    this.resetTime = 1000;
-  }
-}
-
 class ProxyService {
   async handler(targetUrl, method, headers, body) {
     if (targetUrl.includes("https://api.coingecko.com")) {
@@ -54,7 +47,6 @@ class ProxyService {
   }
 
   async etherscan(targetUrl, method) {
-    console.log("targetUrl", targetUrl);
     const response = await axios({
       method,
       url: `${targetUrl}&apiKey=${process.env.ETHERSCAN_API_KEY}`,
@@ -124,7 +116,7 @@ class ProxyService {
       method,
       url: targetUrl,
       headers: {
-        "Authorization": `Bearer ${process.env.SAFE_API_KEY}`,
+        Authorization: `Bearer ${process.env.SAFE_API_KEY}`,
       },
     });
     return {

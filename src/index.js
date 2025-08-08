@@ -5,6 +5,7 @@ const proxyRoutes = require("./routes/proxy");
 const thirdPartyRoutes = require("./routes/third-party");
 const usageRoutes = require("./routes/usage");
 const cacheService = require("./services/cache");
+const ipfsProxyRoutes = require("./routes/ipfs-proxy");
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -33,6 +34,7 @@ app.use(cors(corsOptions));
 app.use("/proxy", proxyRoutes);
 app.use("/third-party", thirdPartyRoutes);
 app.use("/usage", usageRoutes);
+app.use("/ipfs-proxy", ipfsProxyRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

@@ -25,7 +25,6 @@ const getAllowedGatewayUrls = (sourceApp) => {
 
 const validateTargetUrl = (targetUrl, sourceApp) => {
   const parsedURL = new URL(targetUrl);
-  console.log({ parsedURL });
   const allowedGatewayUrls = getAllowedGatewayUrls(sourceApp);
 
   if (!allowedGatewayUrls.includes(parsedURL.origin))

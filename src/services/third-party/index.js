@@ -1,6 +1,6 @@
 const axios = require('axios');
 const dotenv = require('dotenv');
-const { TALLY_QUERY } = require('../../constants/index.js')
+const { TALLY_QUERY, TALLY_PROPOSAL_QUERY } = require('../../constants/index.js')
 const { flattenObject } = require('../../utils/flattenObject.js')
 dotenv.config();
 
@@ -227,11 +227,32 @@ class ThirdPartyService {
           'Api-Key': process.env.TALLY_API_KEY
         }
       })
-      if(response.data.data?.organization){
-        return { organization: flattenObject(response.data.data.organization) }
-      }
       return response.data.data
 
+    } catch (error) {
+      throw new Error(`GraphQL request failed: ${error.message}`);
+    }
+  }
+  async fetchProposals(orgId) {
+    const variables = {input: { filters: { organizationId: orgId } }}
+    try {
+      const response = await axios.post('https://api.tally.xyz/query', {
+        query: TALLY_PROPOSAL_QUERY,
+        variables,
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Api-Key': process.env.TALLY_API_KEY
+        }
+      })
+      const proposalNodes = response.data.data?.proposals?.nodes
+
+      if(proposalNodes){
+        return proposalNodes.map((proposal) => {
+          return flattenObject(proposal)
+        })
+      }
+      return []
     } catch (error) {
       throw new Error(`GraphQL request failed: ${error.message}`);
     }
@@ -278,11 +299,24 @@ class ThirdPartyService {
     return [];
   }
   async tally(operationName, slug){
-    if(operationName === 'organisation'){
-    return await this.fetchTallyOrg(slug)
+    if(operationName === 'organization'){
+      const response =  await this.fetchTallyOrg(slug)
+      if(response?.organization){
+        return [flattenObject(response?.organization)]
+      }
+      return []
     }
 
-    return null
+    if(operationName === 'proposal'){
+      const response =  await this.fetchTallyOrg(slug)
+      if(response?.organization){
+        const orgId = response.organization.id
+        return await this.fetchProposals(orgId)
+      }
+      return []
+    }
+
+    return []
   }
 
   async handler({ service, graphType, category, input1, input2 }) {

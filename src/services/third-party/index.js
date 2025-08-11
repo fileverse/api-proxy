@@ -274,15 +274,19 @@ class ThirdPartyService {
     }
     return [];
   }
-  async tally(id){
-    return await this.fetchTallyOrg(process.env.TALLY_API, id)
+  async tally(operationName, slug){
+    if(operationName === 'organisation'){
+    return await this.fetchTallyOrg(process.env.TALLY_API, slug)
+    }
+
+    return null
   }
 
   async handler({ service, graphType, category, input1, input2 }) {
     if(service === 'tally'){
       return {
         status: 200,
-        data: await this.tally(input1),
+        data: await this.tally(input1, input2),
       };
     }
     if (!category || !graphType) {
@@ -299,13 +303,6 @@ class ThirdPartyService {
         data = await this.aave({ graphType, category, input1, input2 });
     }
     
-    return {
-      status: 200,
-      data: data,
-    };
-  }
-  async handleTallyRequest(slug){
-    const data = await this.tally(slug)
     return {
       status: 200,
       data: data,

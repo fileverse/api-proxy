@@ -214,10 +214,10 @@ class ThirdPartyService {
   }
 
 
-  async fetchTallyOrg(url, slug) {
+  async fetchTallyOrg(slug) {
     const variables = {input: {slug}}
     try {
-      const response = await axios.post(url, {
+      const response = await axios.post('https://api.tally.xyz/query', {
         query: TALLY_QUERY ,
         variables,
       }, {
@@ -276,7 +276,7 @@ class ThirdPartyService {
   }
   async tally(operationName, slug){
     if(operationName === 'organisation'){
-    return await this.fetchTallyOrg(process.env.TALLY_API, slug)
+    return await this.fetchTallyOrg(slug)
     }
 
     return null

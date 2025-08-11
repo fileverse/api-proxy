@@ -1,6 +1,7 @@
 const axios = require('axios');
 const dotenv = require('dotenv');
 const { TALLY_QUERY } = require('../../constants/index.js')
+const { flattenObject } = require('../../utils/flattenObject.js')
 dotenv.config();
 
 class ThirdPartyService {
@@ -224,9 +225,11 @@ class ThirdPartyService {
         headers: {
           'Content-Type': 'application/json',
           'Api-Key': process.env.TALLY_API_KEY
-
         }
       })
+      if(response.data.data?.organization){
+        return { organization: flattenObject(response.data.data.organization) }
+      }
       return response.data.data
 
     } catch (error) {

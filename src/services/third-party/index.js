@@ -1,5 +1,6 @@
 const axios = require('axios');
 const dotenv = require('dotenv');
+const { TALLY_QUERY } = require('../../constants/index.js')
 dotenv.config();
 
 class ThirdPartyService {
@@ -212,6 +213,27 @@ class ThirdPartyService {
       }
   }
 
+
+  async fetchTallyOrg(slug) {
+    const variables = {input: {slug}}
+    try {
+      const response = await axios.post('https://api.tally.xyz/query', {
+        query: TALLY_QUERY ,
+        variables,
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Api-Key': process.env.TALLY_API_KEY
+
+        }
+      })
+      return response.data.data
+
+    } catch (error) {
+      throw new Error(`GraphQL request failed: ${error.message}`);
+    }
+  }
+
   async aavev2(category, input1, input2) {
     let data = [];
     if (category === 'markets') {
@@ -252,17 +274,35 @@ class ThirdPartyService {
     }
     return [];
   }
+  async tally(operationName, slug){
+    if(operationName === 'organisation'){
+    return await this.fetchTallyOrg(slug)
+    }
+
+    return null
+  }
 
   async handler({ service, graphType, category, input1, input2 }) {
-    console.log(service, graphType, category, input1, input2);
+    if(service === 'tally'){
+      return {
+        status: 200,
+        data: await this.tally(input1, input2),
+      };
+    }
+    if (!category || !graphType) {
+      return {
+        data: { error: 'graphType and category are required' }, 
+        status: 400
+      };
+    }    
+    
     let data = [];
     if (service === 'uniswap') {
         data = await this.uniswap({ graphType, category, input1, input2 });
-    }
-    if (service === 'aave') {
+    } else if (service === 'aave') {
         data = await this.aave({ graphType, category, input1, input2 });
     }
-    console.log(data);
+    
     return {
       status: 200,
       data: data,

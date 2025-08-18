@@ -26,6 +26,9 @@ class ProxyService {
     if (targetUrl.includes("https://api.safe.global")) {
       return this.safe(targetUrl, method);
     }
+    if (targetUrl.includes("https://api.sim.dune.com")) {
+      return this.dunesim(targetUrl, method);
+    }
     return this.forwardRequest(targetUrl, method, headers, body);
   }
 
@@ -88,6 +91,21 @@ class ProxyService {
       url: `${targetUrl}`,
       headers: {
         "x-api-key": process.env.FIREFLY_API_KEY,
+      },
+    });
+    return {
+      status: response.status,
+      headers: response.headers,
+      data: response.data,
+    };
+  }
+
+  async dunesim(targetUrl, method) {
+    const response = await axios({
+      method,
+      url: `${targetUrl}`,
+      headers: {
+        "X-Sim-Api-Key": process.env.DUNE_SIM_API_KEY,
       },
     });
     return {

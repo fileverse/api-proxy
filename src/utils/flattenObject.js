@@ -1,24 +1,22 @@
 function flattenObject(obj, parentKey = '', res = {}) {
   for (let key in obj) {
-    if (!obj.hasOwnProperty(key)) continue;
+    if (!Object.prototype.hasOwnProperty.call(obj, key)) continue;
     const newKey = parentKey ? `${parentKey}_${key}` : key;
 
-    if (typeof obj[key] === 'object' && obj[key] !== null && !Array.isArray(obj[key])) {
-      flattenObject(obj[key], newKey, res);
-    } else if (Array.isArray(obj[key])) {
-      obj[key].forEach((val, i) => {
-        if (typeof val === 'object' && val !== null) {
-          flattenObject(val, `${newKey}_${i}`, res);
-        } else {
-          res[`${newKey}_${i}`] = val;
-        }
-      });
+    if (typeof obj[key] === 'object' && obj[key] !== null) {
+      if (Array.isArray(obj[key])) {
+        continue;
+      } else {
+        flattenObject(obj[key], newKey, res);
+      }
     } else {
       res[newKey] = obj[key];
     }
   }
   return res;
 }
+
+
 
 module.exports = {
     flattenObject

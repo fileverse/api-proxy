@@ -307,7 +307,7 @@ class ThirdPartyService {
       return []
     }
 
-    if(operationName === 'proposal'){
+    if(['proposal', 'proposals' ].includes(operationName)){
       const response =  await this.fetchTallyOrg(slug)
       if(response?.organization){
         const orgId = response.organization.id

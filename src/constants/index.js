@@ -1,26 +1,9 @@
 const TALLY_QUERY = `query Organization($input: OrganizationInput!) {
   organization(input: $input) {
     id
-    slug
-    name
     chainIds
     tokenIds
     governorIds
-    metadata {
-      color
-      description
-      icon
-    }
-    creator {
-      id
-      address
-      ens
-      twitter
-      bio
-      picture
-      safes
-      type
-    }
     hasActiveProposals
     proposalsCount
     delegatesCount
@@ -41,6 +24,20 @@ const TALLY_QUERY = `query Organization($input: OrganizationInput!) {
       start_block
       created_at
       updated_at
+    }
+    metadata {
+      description
+      icon
+    }
+    creator {
+      id
+      address
+      ens
+      twitter
+      bio
+      picture
+      safes
+      type
     }
   }
 }`
@@ -64,32 +61,23 @@ query Proposals($input: ProposalsInput!) {
         quorum
         status
         voteStats {
-          type
           votesCount
-          votersCount
-          percent
         }
         start {
           ... on Block {
-            number
             timestamp
           }
         }
         end {
           ... on Block {
-            number
             timestamp
           }
         }
-        organization {
-          slug
+        metadata {
+          title
+          description
         }
       }
-    }
-    pageInfo {
-      firstCursor
-      lastCursor
-      count
     }
   }
 }

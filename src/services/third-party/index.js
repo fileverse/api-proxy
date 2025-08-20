@@ -254,6 +254,8 @@ class ThirdPartyService {
             proposal.quorum = formatQuorum(proposal.quorum, proposal.governor?.token?.decimals);
           }
           if(proposal.voteStats.length > 0){
+              // sum stats for "for" and "abstain" votes
+              // abstain is included if countingMode is "quorum=for,abstain"
               const includeAbstain = /quorum=for,abstain/i.test(
                 proposal.governor?.parameters?.countingMode || ""
               );

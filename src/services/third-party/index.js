@@ -1,7 +1,8 @@
 const axios = require('axios');
 const dotenv = require('dotenv');
 const { TALLY_QUERY, TALLY_PROPOSAL_QUERY } = require('../../constants/index.js')
-const { flattenObject } = require('../../utils/flattenObject.js')
+const { flattenObject } = require('../../utils/flattenObject.js');
+const { formatQuorum } = require('../../utils/formatQuorum.js');
 dotenv.config();
 
 class ThirdPartyService {
@@ -249,6 +250,9 @@ class ThirdPartyService {
 
       if(proposalNodes){
         return proposalNodes.map((proposal) => {
+          if(proposal.quorum){
+            proposal.quorum = formatQuorum(proposal.quorum);
+          }
           return flattenObject(proposal)
         })
       }

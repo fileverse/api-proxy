@@ -58,6 +58,18 @@ query Proposals($input: ProposalsInput!) {
         proposer {
           address
         }
+        voteStats {
+          type
+          votesCount
+        }
+        governor {
+          token {
+            decimals
+          }
+          parameters{
+            countingMode
+          }
+        }
         quorum
         status
         start {

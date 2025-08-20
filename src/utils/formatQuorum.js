@@ -1,12 +1,9 @@
 
-function formatQuorum(raw) {
-  const quorum = BigInt(raw)
-
-  // return if the quorum is not in erc20 token format
-  if(quorum < 10n ** 18n) {
+function formatQuorum(raw, decimals) {
+  if(!decimals){
     return raw
   }
-  const decimals = 18;
+  const quorum = BigInt(raw)
   const divisor = 10 ** decimals;
   const normalized = Number(quorum) / divisor;
 

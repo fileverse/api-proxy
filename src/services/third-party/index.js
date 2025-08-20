@@ -251,8 +251,24 @@ class ThirdPartyService {
       if(proposalNodes){
         return proposalNodes.map((proposal) => {
           if(proposal.quorum){
-            proposal.quorum = formatQuorum(proposal.quorum);
+            proposal.quorum = formatQuorum(proposal.quorum, proposal.governor?.token?.decimals);
           }
+          if(proposal.voteStats.length > 0){
+              const includeAbstain = /quorum=for,abstain/i.test(
+                proposal.governor?.parameters?.countingMode || ""
+              );
+              const decimals = proposal.governor?.token?.decimals
+              const initalReducerValue = decimals ? 0n : 0;
+
+              const votes = proposal.voteStats
+              .filter(stat => stat.type === "for" || (includeAbstain && stat.type === "abstain"))
+              .reduce((sum, x) => {
+                const value = decimals ? BigInt(x.votesCount ?? 0) : Number(x.votesCount) ?? 0
+                return sum + value
+              }, initalReducerValue);
+              proposal.voteStats = formatQuorum(votes, proposal.governor?.token?.decimals);
+          }
+          delete proposal.governor;
           return flattenObject(proposal)
         })
       }

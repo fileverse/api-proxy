@@ -60,9 +60,6 @@ query Proposals($input: ProposalsInput!) {
         }
         quorum
         status
-        voteStats {
-          votesCount
-        }
         start {
           ... on Block {
             timestamp

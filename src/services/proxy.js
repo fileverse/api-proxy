@@ -3,8 +3,34 @@ const dotenv = require("dotenv");
 
 dotenv.config();
 
+const ALLOWED_DOMAINS = [
+  "https://api.coingecko.com",
+  "https://api.etherscan.io",
+  "https://api.basescan.org",
+  "https://api.gnosisscan.io",
+  "https://openapi.firefly.land",
+  "https://api.neynar.com",
+  "https://api.safe.global",
+  "https://api.sim.dune.com",
+];
+
 class ProxyService {
   async handler(targetUrl, method, headers, body) {
+    const parsedURL = this.getParsedURL(targetUrl);
+    if (!parsedURL) {
+      return {
+        status: 400,
+        headers: {},
+        data: {
+          error: "Invalid URL",
+        },
+      };
+    }
+
+    if (!ALLOWED_DOMAINS.includes(parsedURL.origin)) {
+      return this.forwardRequest(targetUrl, method);
+    }
+
     if (targetUrl.includes("https://api.coingecko.com")) {
       return this.coingecko(targetUrl, method);
     }
@@ -29,7 +55,13 @@ class ProxyService {
     if (targetUrl.includes("https://api.sim.dune.com")) {
       return this.dunesim(targetUrl, method);
     }
-    return this.forwardRequest(targetUrl, method, headers, body);
+    return {
+      status: 400,
+      headers: {},
+      data: {
+        error: "Invalid Request",
+      },
+    };
   }
 
   async coingecko(targetUrl, method, headers, body) {
@@ -158,6 +190,15 @@ class ProxyService {
     } catch (error) {
       console.error("Proxy forward error:", error);
       throw new Error("Failed to forward request to target API");
+    }
+  }
+
+  getParsedURL(targetUrl) {
+    try {
+      return new URL(targetUrl);
+    } catch (err) {
+      console.log("Invalid URL:", targetUrl);
+      return null;
     }
   }
 }

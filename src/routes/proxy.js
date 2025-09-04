@@ -2,18 +2,18 @@ const express = require("express");
 const router = express.Router();
 const cacheService = require("../services/cache");
 const proxyService = require("../services/proxy");
-const { isCacheableUrl } = require("../services/utils");
 
 router.get("/", async (req, res) => {
   try {
     const targetUrl = req.headers["target-url"];
     const method = req.headers["method"];
+    const { refresh } = req.params
     if (!targetUrl || !method) {
       return res
         .status(400)
         .json({ error: "Target-URL and method headers are required" });
     }
-    const isCacheable = isCacheableUrl(targetUrl)
+    const isCacheable = refresh !== "true"
     // // Generate cache key
     const cacheKey = cacheService.generateCacheKey(
       req.method,

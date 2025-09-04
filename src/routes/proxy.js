@@ -7,12 +7,13 @@ router.get("/", async (req, res) => {
   try {
     const targetUrl = req.headers["target-url"];
     const method = req.headers["method"];
+    const { refresh } = req.params
     if (!targetUrl || !method) {
       return res
         .status(400)
         .json({ error: "Target-URL and method headers are required" });
     }
-
+    const isCacheable = refresh !== "true"
     // // Generate cache key
     const cacheKey = cacheService.generateCacheKey(
       req.method,
@@ -20,9 +21,8 @@ router.get("/", async (req, res) => {
       req.body
     );
     // Check cache
-    const cachedResponse = await cacheService.get(cacheKey);
-    if (cachedResponse) {
-      console.log("serving from cache");
+    const cachedResponse = isCacheable ? await cacheService.get(cacheKey) : null;
+    if(cachedResponse){
       return res
         .status(cachedResponse.status)
         .set(cachedResponse.headers || {})
@@ -41,7 +41,7 @@ router.get("/", async (req, res) => {
     };
 
     // Cache successful responses
-    if (response.status === 200) {
+    if (response.status === 200 && isCacheable) {
       await cacheService.set(cacheKey, cacheableResponse);
     }
 

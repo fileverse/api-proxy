@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const cacheService = require("../services/cache");
 const proxyService = require("../services/proxy");
+const { isCacheable } = require("../services/utils");
 
 router.get("/", async (req, res) => {
   try {
@@ -20,9 +21,8 @@ router.get("/", async (req, res) => {
       req.body
     );
     // Check cache
-    const cachedResponse = await cacheService.get(cacheKey);
-    if (cachedResponse) {
-      console.log("serving from cache");
+    const cachedResponse = isCacheable(targetUrl) ? await cacheService.get(cacheKey) : null;
+    if(cachedResponse){
       return res
         .status(cachedResponse.status)
         .set(cachedResponse.headers || {})

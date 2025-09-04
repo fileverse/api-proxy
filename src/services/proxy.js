@@ -133,18 +133,26 @@ class ProxyService {
   }
 
   async dunesim(targetUrl, method) {
-    const response = await axios({
-      method,
-      url: `${targetUrl}`,
-      headers: {
-        "X-Sim-Api-Key": process.env.DUNE_SIM_API_KEY,
-      },
-    });
-    return {
-      status: response.status,
-      headers: response.headers,
-      data: response.data,
-    };
+    try {
+      const response = await axios({
+        method,
+        url: `${targetUrl}`,
+        headers: {
+          "X-Sim-Api-Key": process.env.DUNE_SIM_API_KEY,
+        },
+      });
+      return {
+        status: response.status,
+        headers: response.headers,
+        data: response.data,
+      };
+    } catch (error) {
+      return {
+        status: error.response.status,
+        headers: error.response.headers,
+        data: error.response.data,
+      }; 
+    }
   }
 
   async neynar(targetUrl, method) {

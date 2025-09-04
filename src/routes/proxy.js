@@ -7,7 +7,7 @@ router.get("/", async (req, res) => {
   try {
     const targetUrl = req.headers["target-url"];
     const method = req.headers["method"];
-    const { refresh } = req.params
+    const { refresh } = req.query
     if (!targetUrl || !method) {
       return res
         .status(400)
@@ -41,7 +41,7 @@ router.get("/", async (req, res) => {
     };
 
     // Cache successful responses
-    if (response.status === 200 && isCacheable) {
+    if (response.status === 200) {
       await cacheService.set(cacheKey, cacheableResponse);
     }
 

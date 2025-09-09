@@ -22,7 +22,6 @@ router.get("/", async (req, res) => {
     // Check cache
     const cachedResponse = await cacheService.get(cacheKey)
     if(cachedResponse){
-      console.log('reading from cache', )
       return res
         .status(cachedResponse.status)
         .set(cachedResponse.headers || {})

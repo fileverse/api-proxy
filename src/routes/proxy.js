@@ -13,7 +13,6 @@ router.get("/", async (req, res) => {
         .status(400)
         .json({ error: "Target-URL and method headers are required" });
     }
-    const isCacheable = refresh !== "true"
     // // Generate cache key
     const cacheKey = cacheService.generateCacheKey(
       req.method,
@@ -21,8 +20,9 @@ router.get("/", async (req, res) => {
       req.body
     );
     // Check cache
-    const cachedResponse = isCacheable ? await cacheService.get(cacheKey) : null;
+    const cachedResponse = await cacheService.get(cacheKey)
     if(cachedResponse){
+      console.log('reading from cache', )
       return res
         .status(cachedResponse.status)
         .set(cachedResponse.headers || {})
@@ -42,7 +42,8 @@ router.get("/", async (req, res) => {
 
     // Cache successful responses
     if (response.status === 200) {
-      await cacheService.set(cacheKey, cacheableResponse);
+      const isRefresh = refresh === "true"
+      await cacheService.set(cacheKey, cacheableResponse, isRefresh ? 180 : cacheService.DEFAULT_TTL); // cache for 3 minutes
     }
 
     // Track usage

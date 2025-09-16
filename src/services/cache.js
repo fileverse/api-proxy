@@ -5,6 +5,7 @@ class CacheService {
     this.client = Redis.createClient({
       url: process.env.REDIS_URL || "redis://localhost:6379",
     });
+    this.DEFAULT_TTL = 3600
 
     this.client.on("error", (err) => console.error("Redis Client Error:", err));
     this.client.on("connect", () => console.log("Redis Client Connected"));
@@ -38,7 +39,7 @@ class CacheService {
     }
   }
 
-  async set(key, value, ttl = process.env.CACHE_TTL || 3600) {
+  async set(key, value, ttl = process.env.CACHE_TTL || this.DEFAULT_TTL) {
     try {
       await this.client.setEx(key, ttl, JSON.stringify(value));
       return true;

@@ -3,7 +3,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const ALLOWED_SOURCE_APPS_MAP = {
-  ddocs: "ddocs",
+  ddocs: "ddoc",
   dsheet: "dsheet",
 };
 

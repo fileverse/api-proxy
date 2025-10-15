@@ -3,6 +3,20 @@ const dotenv = require('dotenv');
 const { TALLY_QUERY, TALLY_PROPOSAL_QUERY } = require('../../constants/index.js')
 const { flattenObject } = require('../../utils/flattenObject.js');
 const { formatQuorum } = require('../../utils/formatQuorum.js');
+const {
+    getDateFromTimeAgo,
+    getCoingeckoHistoricalDataById,
+    getDuneSimTokenInfo,
+    getValidChainIds,
+    currentDate,
+    normaliseString
+} = require('../../utils/price-helpers.js')
+
+const {
+    getBalanceViaDune,
+    getBlocksNumberByTimeAgo,
+    getEthersScanTxList
+} = require('../../utils/wallet-helpers.js')
 dotenv.config();
 
 class ThirdPartyService {
@@ -341,7 +355,116 @@ class ThirdPartyService {
     return []
   }
 
-  async handler({ service, graphType, category, input1, input2 }) {
+
+
+  async price(params){
+    let { coin, time, token, chain } = params
+
+    if(token){
+      if(!chain){
+        throw new Error('chain is required for querying token price')
+      }
+      const data = await getDuneSimTokenInfo(token, chain, time)
+      return data
+    }
+
+    if(coin) {
+      // const invalidSymbols = validateCurrencySymbol(coin)
+
+      // if(!invalidSymbols.length){
+      //   throw new Error(`Invalid symbols: ${invalidSymbols?.join(',') || 'undefined'}`) 
+      // }
+
+      if(time){
+        time = getDateFromTimeAgo(time)
+      } else {
+        time = [currentDate()]
+      }
+      const result =  []
+      const symbols = coin.split(',')
+
+      for(const symbol of symbols){
+        for(let date of time){
+          const data = await getCoingeckoHistoricalDataById(symbol, date)
+          result.push(data)
+        }
+
+      }
+      return result
+    }
+    throw new Error('Invalid Request')
+  }
+
+  async wallet(params){
+    let { query, addresses, chains, time } = params
+    const validChains = await getValidChainIds(chains)
+    if(query === 'balance'){
+      const data = []
+      addresses = normaliseString(addresses)
+      const addressesList = addresses.split(',')
+
+      for(const address of addressesList){
+        const result = await getBalanceViaDune(address, validChains, time)
+        data.push(...result)
+      }
+
+      return data
+    } else if(query === 'txns'){
+      const data = []
+      const timeFrames = time.split(',')
+      if(!timeFrames.length){
+        const chainList = validChains.split(',')
+        for(let chainId of chainList){
+          const { startBlock, endBlock } = await getBlocksNumberByTimeAgo('latest', chainId)
+          const result = await getEthersScanTxList(addresses, { startBlock, endBlock }, chainId)
+          data.push(result)
+        }
+      }
+      for(const timeFrame of timeFrames){
+        const chainList = validChains.split(',')
+        for(let chainItem of chainList){
+          const { startBlock, endBlock } = await getBlocksNumberByTimeAgo(timeFrame, chainItem)
+          const result = await getEthersScanTxList(addresses, { startBlock, endBlock }, chainItem)
+          for(let resultData of result){
+            data.push({chain: chainItem, ...resultData})
+          }
+        }
+      }
+      return data
+    }
+  }
+
+  async handler({ service, graphType, category, input1, input2, ...rest }) {
+    if(service === 'price'){
+      try {
+              return  {
+                status: 200,
+                data: await this.price(rest),
+              }
+      } catch (error) {
+        return {
+                status: 400,
+                data: {
+                  message: error.message || 'An Unexpected error occurred'
+                }
+              }
+      }
+    }
+    if(service === 'wallet'){
+        try {
+          return {
+            status: 200,
+            data: await this.wallet(rest),
+          }
+        } catch (error) {
+            return {
+              status: 400,
+              data: {
+                message: error.message || 'An Unexpected error occurred'
+              }
+            }
+        }
+    }
     if(service === 'tally'){
       return {
         status: 200,

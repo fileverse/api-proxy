@@ -44,7 +44,10 @@ const SUPPORTED_CHAINS = new Map()
   async function getDuneSimTokenInfo (tokenAddress, chain, time) {
     try {
           const chainId = await getValidChainIds(chain)
-          const url = `https://api.sim.dune.com/v1/evm/token-info/${tokenAddress}?historical_prices=${time}&chain_ids=${chainId}`
+          const url = `https://api.sim.dune.com/v1/evm/token-info/${tokenAddress}?chain_ids=${chainId}`
+          if(time){
+            url += `&historical_prices=${time}`
+          }
           const response = await axios(url, {
             headers: {
               "X-Sim-Api-Key": process.env.DUNE_SIM_API_KEY
@@ -52,6 +55,8 @@ const SUPPORTED_CHAINS = new Map()
           })
       
           const data = response.data.tokens 
+
+          if(time){
       
           for(let item of data){
               const prices = item.historical_prices
@@ -62,6 +67,8 @@ const SUPPORTED_CHAINS = new Map()
                 delete item['historical_prices']
               })
           }
+          }
+
           return data 
     } catch (error) {
       throw new Error(error?.response?.data?.message || error.message || 'Unexpected Error')

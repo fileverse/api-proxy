@@ -134,10 +134,10 @@ const POPULAR_SYMBOLS = ['bitcoin', 'ethereum'] // use in other for same symbols
       if (isNaN(hours)) {
         throw new Error(`Invalid number: "${hoursStr}"`);
       }
-      const date = new Date(now.getTime() - hours * 60 * 60 * 1000);
+  const date = new Date(now.getTime() - hours * 60 * 60 * 1000);
       return date.toISOString().split('T')[0];
     });
-  }
+}
 
   function currentDate(){
     const now = new Date();
@@ -165,7 +165,7 @@ const POPULAR_SYMBOLS = ['bitcoin', 'ethereum'] // use in other for same symbols
 
           const priceInUsd = market_data.current_price.usd
 
-          return { price: priceInUsd, date, coin: id }
+          return { price: priceInUsd, date, coin: id,  symbol}
     } catch (error) {
        throw new Error(error?.response?.data?.status?.error_message || error.message)
     }

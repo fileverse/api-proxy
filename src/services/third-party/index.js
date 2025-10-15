@@ -5,11 +5,11 @@ const { flattenObject } = require('../../utils/flattenObject.js');
 const { formatQuorum } = require('../../utils/formatQuorum.js');
 const {
     getDateFromTimeAgo,
-    validateCurrencySymbol,
     getCoingeckoHistoricalDataById,
     getDuneSimTokenInfo,
     getValidChainIds,
-    currentDate
+    currentDate,
+    normaliseString
 } = require('../../utils/price-helpers.js')
 
 const {
@@ -365,9 +365,7 @@ class ThirdPartyService {
         throw new Error('chain is required for querying token price')
       }
       const data = await getDuneSimTokenInfo(token, chain, time)
-      return {
-        price: data
-      }
+      return data
     }
 
     if(coin) {
@@ -392,30 +390,25 @@ class ThirdPartyService {
         }
 
       }
-      return {
-        price: result
-      }
+      return result
     }
     throw new Error('Invalid Request')
   }
 
   async wallet(params){
-    const { query, addresses, chain, time } = params
-    const validChains = await getValidChainIds(chain)
+    let { query, addresses, chains, time } = params
+    const validChains = await getValidChainIds(chains)
     if(query === 'balance'){
       const data = []
+      addresses = normaliseString(addresses)
       const addressesList = addresses.split(',')
 
       for(const address of addressesList){
-        console.log("fetchinf for", address)
         const result = await getBalanceViaDune(address, validChains, time)
-        console.log({result})
         data.push(...result)
       }
 
-      return {
-          balances: data
-      }
+      return data
     } else if(query === 'txns'){
       const data = []
       const timeFrames = time.split(',')
@@ -433,14 +426,11 @@ class ThirdPartyService {
           const { startBlock, endBlock } = await getBlocksNumberByTimeAgo(timeFrame, chainItem)
           const result = await getEthersScanTxList(addresses, { startBlock, endBlock }, chainItem)
           for(let resultData of result){
-            console.log({resultData})
             data.push({chain: chainItem, ...resultData})
           }
         }
       }
-      return {
-        transactions: data
-      }
+      return data
     }
   }
 

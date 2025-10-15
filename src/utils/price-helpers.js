@@ -6,6 +6,8 @@ const cachedValidSymbols = new Map()
 
 const SUPPORTED_CHAINS = new Map()
 
+ const normaliseString = (string) => string.replace(/\s+/g, "")
+
  async function getSupportedChain(){
     if(SUPPORTED_CHAINS.size){
         return SUPPORTED_CHAINS
@@ -29,11 +31,12 @@ const SUPPORTED_CHAINS = new Map()
   async function getValidChainIds(chain){
 
     const CHAIN_IDs = await getSupportedChain()
+    const normalisedChain = normaliseString(chain)
 
-    return chain
+    return normalisedChain
     .split(',')
     .map((name) => {
-      const key = name.trim().toLowerCase();
+      const key = name;
       const record = CHAIN_IDs.get(key);
       if (!record) throw new Error(`Unknown chain name: "${key}"`);
       return record.chainId;
@@ -44,7 +47,7 @@ const SUPPORTED_CHAINS = new Map()
   async function getDuneSimTokenInfo (tokenAddress, chain, time) {
     try {
           const chainId = await getValidChainIds(chain)
-          const url = `https://api.sim.dune.com/v1/evm/token-info/${tokenAddress}?chain_ids=${chainId}`
+          let url = `https://api.sim.dune.com/v1/evm/token-info/${tokenAddress}?chain_ids=${chainId}`
           if(time){
             url += `&historical_prices=${time}`
           }
@@ -174,5 +177,6 @@ module.exports = {
     validateCurrencySymbol,
     getCoingeckoHistoricalDataById,
     getDuneSimTokenInfo,
-    getValidChainIds
+    getValidChainIds,
+    normaliseString
 }

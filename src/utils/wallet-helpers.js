@@ -1,12 +1,14 @@
 const axios = require('axios');
 const dotenv = require('dotenv');
+const { normaliseString } = require('../utils/price-helpers')
 dotenv.config();  
   
   async function getBalanceViaDune(address, chains, time){
     try {
           let url = `https://api.sim.dune.com/v1/evm/balances/${address}?chain_ids=${chains}`
+
           if (time) {
-              url += `&historical_prices=${encodeURIComponent(time)}`
+              url += `&historical_prices=${time}`
           }
           const response = await axios(url, {
             headers: { "X-Sim-Api-Key": process.env.DUNE_SIM_API_KEY }
@@ -64,16 +66,19 @@ dotenv.config();
   async function getEthersScanTxList(addresses, time, chainId){
     const {startBlock, endBlock} = time
 
-    const url = `https://api.etherscan.io/v2/api?chainid=${chainId}&module=account&action=txlist&address=${addresses}&startblock=${startBlock}&endblock=${endBlock}&sort=asc&apikey=${process.env.ETHERSCAN}`
+    const normalizedAddresses = normaliseString(addresses)
 
+    const addressList = normalizedAddresses.split(',')
+    const data = []
 
-    const response = await axios(url)
-
-    const { result } = response.data
-    if(response.data.status !== "1"){
-        throw new Error(result || response.data.message)
+    for(let address of addressList){
+        const url = `https://api.etherscan.io/v2/api?chainid=${chainId}&module=account&action=txlist&address=${address}&startblock=${startBlock}&endblock=${endBlock}&sort=asc&apikey=${process.env.ETHERSCAN}&offset=100&page=1`
+        const response = await axios(url)
+        const { result } = response.data
+        const resultData = result || []
+        data.push(...resultData)
     }
-    return result
+    return data
 
   }
 

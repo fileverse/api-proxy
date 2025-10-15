@@ -369,11 +369,11 @@ class ThirdPartyService {
     }
 
     if(coin) {
-      // const invalidSymbols = validateCurrencySymbol(coin)
+      const invalidSymbols = validateCurrencySymbol(coin)
 
-      // if(!invalidSymbols.length){
-      //   throw new Error(`Invalid symbols: ${invalidSymbols?.join(',') || 'undefined'}`) 
-      // }
+      if(!invalidSymbols.length){
+        throw new Error(`Invalid symbols: ${invalidSymbols?.join(',') || 'undefined'}`) 
+      }
 
       if(time){
         time = getDateFromTimeAgo(time)

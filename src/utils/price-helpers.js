@@ -139,33 +139,31 @@ const SUPPORTED_CHAINS = new Map()
 
 
   async function getCoingeckoHistoricalDataById (symbol, date) {
-    return { price: 8498989989, time: date, coin: symbol }
-
-    // try {
-    //       const id = this.cachedValidSymbols.get(symbol).id
+    try {
+          const id = this.cachedValidSymbols.get(symbol).id
     
-    //       if(!id){
-    //         new Error('Invalid coin id')
-    //       }
-    //       const url = `https://pro-api.coingecko.com/api/v3/coins/${id}/history?date=${date}&localization=false`;
+          if(!id){
+            new Error('Invalid coin id')
+          }
+          const url = `https://pro-api.coingecko.com/api/v3/coins/${id}/history?date=${date}&localization=false`;
     
-    //       const response = await axios(url, {
-    //         headers: {
-    //           'x-cg-pro-api-key': process.env.COINGECKO_API_KEY
-    //         }
-    //       })
+          const response = await axios(url, {
+            headers: {
+              'x-cg-pro-api-key': process.env.COINGECKO_API_KEY
+            }
+          })
 
 
-    //       const data = response.data
+          const data = response.data
 
-    //       const {market_data} = data
+          const {market_data} = data
 
-    //       const priceInUsd = market_data.usd
+          const priceInUsd = market_data.usd
 
-    //       return { price: priceInUsd, time: date, coin: id }
-    // } catch (error) {
-    //    throw new Error(error?.response?.data?.status?.error_message || error.message)
-    // }
+          return { price: priceInUsd, time: date, coin: id }
+    } catch (error) {
+       throw new Error(error?.response?.data?.status?.error_message || error.message)
+    }
 
   }
 

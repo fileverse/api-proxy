@@ -9,7 +9,8 @@ const {
     getDuneSimTokenInfo,
     getValidChainIds,
     currentDate,
-    normaliseString
+    normaliseString,
+    validateCurrencySymbol
 } = require('../../utils/price-helpers.js')
 
 const {
@@ -369,9 +370,11 @@ class ThirdPartyService {
     }
 
     if(coin) {
-      const invalidSymbols = validateCurrencySymbol(coin)
 
-      if(!invalidSymbols.length){
+      const invalidSymbols = await validateCurrencySymbol(coin)
+      
+
+      if(invalidSymbols.length){
         throw new Error(`Invalid symbols: ${invalidSymbols?.join(',') || 'undefined'}`) 
       }
 

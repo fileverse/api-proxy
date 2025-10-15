@@ -6,6 +6,8 @@ const cachedValidSymbols = new Map()
 
 const SUPPORTED_CHAINS = new Map()
 
+const POPULAR_SYMBOLS = ['bitcoin', 'ethereum'] // use in other for same symbols to not override popular symbols in cachedValidSymbols
+
  const normaliseString = (string) => string.replace(/\s+/g, "")
 
  async function getSupportedChain(){
@@ -90,19 +92,24 @@ const SUPPORTED_CHAINS = new Map()
       })
 
       const data = response.data
-      const validSymbolsMap = new Map();
 
       data.forEach((item) => {
         const {symbol, id} = item
         if(symbol){
-          validSymbolsMap.set(symbol, {id, symbol})
+          if(cachedValidSymbols.get(symbol)){
+            const prevValue = cachedValidSymbols.get(symbol).id
+            if(!POPULAR_SYMBOLS.includes(prevValue.toLowerCase())){
+              cachedValidSymbols.set(symbol, {id, symbol})
+            }
+          } else {
+            cachedValidSymbols.set(symbol, {id, symbol})
+          }
         }
         if(id){
-          validSymbolsMap.set(id, {id, symbol})
+          cachedValidSymbols.set(id, {id, symbol})
         }
       })
-      cachedValidSymbols = validSymbolsMap
-      return validSymbolsMap
+      return cachedValidSymbols
     } catch (error) {
         throw new Error(error?.response?.data?.status?.error_message || error.message)
     }
@@ -128,19 +135,19 @@ const SUPPORTED_CHAINS = new Map()
         throw new Error(`Invalid number: "${hoursStr}"`);
       }
       const date = new Date(now.getTime() - hours * 60 * 60 * 1000);
-      return date.toISOString().slice(0, 16); // "YYYY-MM-DDTHH:MM"
+      return date.toISOString().split('T')[0];
     });
   }
 
   function currentDate(){
     const now = new Date();
-    return now.toISOString().slice(0, 16);  
+    return now.toISOString().split('T')[0];  
   }
 
 
   async function getCoingeckoHistoricalDataById (symbol, date) {
     try {
-          const id = this.cachedValidSymbols.get(symbol).id
+          const id = cachedValidSymbols.get(symbol).id
     
           if(!id){
             new Error('Invalid coin id')
@@ -152,15 +159,13 @@ const SUPPORTED_CHAINS = new Map()
               'x-cg-pro-api-key': process.env.COINGECKO_API_KEY
             }
           })
-
-
           const data = response.data
 
           const {market_data} = data
 
-          const priceInUsd = market_data.usd
+          const priceInUsd = market_data.current_price.usd
 
-          return { price: priceInUsd, time: date, coin: id }
+          return { price: priceInUsd, date, coin: id }
     } catch (error) {
        throw new Error(error?.response?.data?.status?.error_message || error.message)
     }

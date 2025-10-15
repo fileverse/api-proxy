@@ -3,6 +3,20 @@ const dotenv = require('dotenv');
 const { TALLY_QUERY, TALLY_PROPOSAL_QUERY } = require('../../constants/index.js')
 const { flattenObject } = require('../../utils/flattenObject.js');
 const { formatQuorum } = require('../../utils/formatQuorum.js');
+const {
+    getDateFromTimeAgo,
+    validateCurrencySymbol,
+    getCoingeckoHistoricalDataById,
+    getDuneSimTokenInfo,
+    getValidChainIds,
+    currentDate
+} = require('../../utils/price-helpers.js')
+
+const {
+    getBalanceViaDune,
+    getBlocksNumberByTimeAgo,
+    getEthersScanTxList
+} = require('../../utils/wallet-helpers.js')
 dotenv.config();
 
 class ThirdPartyService {
@@ -341,7 +355,126 @@ class ThirdPartyService {
     return []
   }
 
-  async handler({ service, graphType, category, input1, input2 }) {
+
+
+  async price(params){
+    let { coin, time, token, chain } = params
+
+    if(token){
+      if(!chain){
+        throw new Error('chain is required for querying token price')
+      }
+      const data = await getDuneSimTokenInfo(token, chain, time)
+      return {
+        price: data
+      }
+    }
+
+    if(coin) {
+      // const invalidSymbols = validateCurrencySymbol(coin)
+
+      // if(!invalidSymbols.length){
+      //   throw new Error(`Invalid symbols: ${invalidSymbols?.join(',') || 'undefined'}`) 
+      // }
+
+      if(time){
+        time = getDateFromTimeAgo(time)
+      } else {
+        time = [currentDate()]
+      }
+      const result =  []
+      const symbols = coin.split(',')
+
+      for(const symbol of symbols){
+        for(let date of time){
+          const data = await getCoingeckoHistoricalDataById(symbol, date)
+          result.push(data)
+        }
+
+      }
+      return {
+        price: result
+      }
+    }
+    throw new Error('Invalid Request')
+  }
+
+  async wallet(params){
+    const { query, addresses, chain, time } = params
+    const validChains = await getValidChainIds(chain)
+    if(query === 'balance'){
+      const data = []
+      const addressesList = addresses.split(',')
+
+      for(const address of addressesList){
+        console.log("fetchinf for", address)
+        const result = await getBalanceViaDune(address, validChains, time)
+        console.log({result})
+        data.push(...result)
+      }
+
+      return {
+          balances: data
+      }
+    } else if(query === 'txns'){
+      const data = []
+      const timeFrames = time.split(',')
+      if(!timeFrames.length){
+        const chainList = validChains.split(',')
+        for(let chainId of chainList){
+          const { startBlock, endBlock } = await getBlocksNumberByTimeAgo('latest', chainId)
+          const result = await getEthersScanTxList(addresses, { startBlock, endBlock }, chainId)
+          data.push(result)
+        }
+      }
+      for(const timeFrame of timeFrames){
+        const chainList = validChains.split(',')
+        for(let chainItem of chainList){
+          const { startBlock, endBlock } = await getBlocksNumberByTimeAgo(timeFrame, chainItem)
+          const result = await getEthersScanTxList(addresses, { startBlock, endBlock }, chainItem)
+          for(let resultData of result){
+            console.log({resultData})
+            data.push({chain: chainItem, ...resultData})
+          }
+        }
+      }
+      return {
+        transactions: data
+      }
+    }
+  }
+
+  async handler({ service, graphType, category, input1, input2, ...rest }) {
+    if(service === 'price'){
+      try {
+              return  {
+                status: 200,
+                data: await this.price(rest),
+              }
+      } catch (error) {
+        return {
+                status: 400,
+                data: {
+                  message: error.message || 'An Unexpected error occurred'
+                }
+              }
+      }
+    }
+    if(service === 'wallet'){
+        try {
+          return {
+            status: 200,
+            data: await this.wallet(rest),
+          }
+        } catch (error) {
+            return {
+              status: 400,
+              data: {
+                message: error.message || 'An Unexpected error occurred'
+              }
+            }
+        }
+    }
     if(service === 'tally'){
       return {
         status: 200,

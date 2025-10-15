@@ -5,11 +5,11 @@ const thirdPartyService = require('../services/third-party');
 
 router.get('/', async (req, res) => {
   try {
-    const { service, category, graphType, input1, input2 } = req.query;
+    const { service, category, graphType, input1, input2, ...rest } = req.query;
     if (!service) {
       return res.status(400).json({ error: 'Service is required' });
     }
-    const response = await thirdPartyService.handler({ service, graphType, category, input1, input2 });
+    const response = await thirdPartyService.handler({ service, graphType, category, input1, input2, ...rest });
     return res.status(response.status).json(response.data);
   } catch (error) {
     console.error('Proxy route error:', error);

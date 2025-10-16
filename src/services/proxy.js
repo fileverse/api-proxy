@@ -65,13 +65,18 @@ class ProxyService {
   }
 
   async coingecko(targetUrl, method, headers, body) {
+    const _headers = {
+      ...headers,
+    };
+    if (process.env.COINGECKO_KEY_TYPE === "pro") {
+      _headers["x_cg_pro_api_key"] = process.env.COINGECKO_API_KEY;
+    } else {
+      _headers["x-cg-demo-api-key"] = process.env.COINGECKO_API_KEY;
+    }
     const response = await axios({
       method,
       url: targetUrl,
-      headers: {
-        ...headers,
-        "x-cg-demo-api-key": process.env.COINGECKO_API_KEY,
-      },
+      headers: _headers,
       data: body,
     });
     return {
@@ -151,7 +156,7 @@ class ProxyService {
         status: error.response.status,
         headers: error.response.headers,
         data: error.response.data,
-      }; 
+      };
     }
   }
 

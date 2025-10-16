@@ -65,7 +65,7 @@ class ProxyService {
   }
 
   async coingecko(targetUrl, method, headers, body) {
-    const headers = {
+    const _headers = {
       ...headers,
     };
     if (process.env.COINGECKO_KEY_TYPE === "pro") {
@@ -76,7 +76,7 @@ class ProxyService {
     const response = await axios({
       method,
       url: targetUrl,
-      headers: headers,
+      headers: _headers,
       data: body,
     });
     return {

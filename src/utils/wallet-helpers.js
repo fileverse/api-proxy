@@ -55,7 +55,7 @@ dotenv.config();
     }
     else {
       const now = Date.now()
-      const start = now - time * 3600
+      const start = now - time * 3600 * 1000
       const end = now
       const [startBlock, endBlock] = await Promise.all([
         getBlockNumber(start, chainId),

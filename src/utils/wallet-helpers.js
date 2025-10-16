@@ -1,7 +1,7 @@
 const axios = require('axios');
 const dotenv = require('dotenv');
 const { normaliseString } = require('../utils/price-helpers');
-const { formatTimestamp, usdFormatter, numberFormatter, formatByDecimals } = require('./formatters');
+const { formatTimestamp, numberFormatter, formatByDecimals } = require('./formatters');
 dotenv.config();  
   
   async function getBalanceViaDune(address, chains, time){
@@ -22,8 +22,8 @@ dotenv.config();
             returnValue.name = bal.name
             returnValue.chain = bal.chain
             returnValue.token_balance = `${formatByDecimals(bal.amount, bal.decimals)} ${bal.symbol}`
-            returnValue.balance_usd = usdFormatter.format(bal.value_usd)
-            returnValue.price_usd = usdFormatter.format(bal.price_usd)
+            returnValue.balance_usd = bal.value_usd
+            returnValue.price_usd = bal.price_usd
             returnValue.token_address = bal.address
             returnValue.pool_size = `${numberFormatter.format(bal.pool_size)} ${bal.symbol}`
             returnValue.low_liquidity = bal.low_liquidity

@@ -1,10 +1,3 @@
- const usdFormatter = new Intl.NumberFormat('en-US', {
-  style: 'currency',
-  currency: 'USD',
-  notation: 'compact',
-  maximumFractionDigits: 2
-});
-
 const numberFormatter =   new Intl.NumberFormat('en-US', {
     notation: 'compact',
     maximumFractionDigits: 2,
@@ -31,7 +24,6 @@ function formatTimestamp(ts) {
 }
 
 module.exports  = {
-    usdFormatter,
     numberFormatter,
     formatByDecimals,
     formatTimestamp

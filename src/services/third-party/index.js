@@ -414,25 +414,27 @@ class ThirdPartyService {
       return data
     } else if(query === 'txns'){
       const data = []
-      const timeFrames = time.split(',')
-      if(!timeFrames.length){
+      const timeFrames = time?.split(',')
+      if(!timeFrames?.length){
         const chainList = validChains.split(',')
         for(let chainId of chainList){
           const { startBlock, endBlock } = await getBlocksNumberByTimeAgo('latest', chainId)
           const result = await getEthersScanTxList(addresses, { startBlock, endBlock }, chainId)
-          data.push(result)
+          data.push(...result)
         }
-      }
-      for(const timeFrame of timeFrames){
-        const chainList = validChains.split(',')
-        for(let chainItem of chainList){
-          const { startBlock, endBlock } = await getBlocksNumberByTimeAgo(timeFrame, chainItem)
-          const result = await getEthersScanTxList(addresses, { startBlock, endBlock }, chainItem)
-          for(let resultData of result){
-            data.push({chain: chainItem, ...resultData})
+      } else {
+        for(const timeFrame of timeFrames){
+          const chainList = validChains.split(',')
+          for(let chainItem of chainList){
+            const { startBlock, endBlock } = await getBlocksNumberByTimeAgo(timeFrame, chainItem)
+            const result = await getEthersScanTxList(addresses, { startBlock, endBlock }, chainItem)
+            for(let resultData of result){
+              data.push({chain: chainItem, ...resultData})
+            }
           }
         }
       }
+
       return data
     }
   }

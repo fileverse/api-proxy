@@ -1,5 +1,10 @@
 const axios = require('axios');
 const dotenv = require('dotenv');
+const {
+    usdFormatter,
+    numberFormatter,
+    formatByDecimals
+} = require('../utils/formatters.js')
 dotenv.config();    
   
 const cachedValidSymbols = new Map()
@@ -9,6 +14,8 @@ const SUPPORTED_CHAINS = new Map()
 const POPULAR_SYMBOLS = ['bitcoin', 'ethereum'] // use in other for same symbols to not override popular symbols in cachedValidSymbols
 
  const normaliseString = (string) => string.replace(/\s+/g, "")
+
+
 
  async function getSupportedChain(){
     if(SUPPORTED_CHAINS.size){
@@ -59,20 +66,28 @@ const POPULAR_SYMBOLS = ['bitcoin', 'ethereum'] // use in other for same symbols
             }
           })
       
-          const data = response.data.tokens 
+          const data = response.data.tokens.map((tokenInfo) => {
+            const result = {}
+            result.name = tokenInfo.name
+            result.chain = tokenInfo.chain
+            result.price_usd = usdFormatter.format(tokenInfo.price_usd)
+            const supply = formatByDecimals(tokenInfo.total_supply, tokenInfo.decimals)
+            result.total_supply = `${numberFormatter.format(supply)} ${tokenInfo.symbol}`
+            result.fully_diluted_value = usdFormatter.format(tokenInfo.fully_diluted_value)
+            const poolSize = formatByDecimals(tokenInfo.pool_size, tokenInfo.decimals)
+            result.pool_size = `${numberFormatter.format(poolSize)} ${tokenInfo.symbol}`
 
-          if(time){
-      
-          for(let item of data){
-              const prices = item.historical_prices
+            if(time){
+             const prices = tokenInfo.historical_prices
               prices.forEach((priceData) => {
                 const key = "price_in_" + priceData.offset_hours +"h"
                 const price = priceData.price_usd 
-                item[key] = price
-                delete item['historical_prices']
+                result[key] = usdFormatter.format(price)
               })
-          }
-          }
+            }
+            return result
+
+          }) 
 
           return data 
     } catch (error) {
@@ -165,7 +180,7 @@ const POPULAR_SYMBOLS = ['bitcoin', 'ethereum'] // use in other for same symbols
 
           const priceInUsd = market_data.current_price.usd
 
-          return { price: priceInUsd, date, coin: id,  symbol}
+          return { price: usdFormatter.format(priceInUsd), date, coin: id,  symbol}
     } catch (error) {
        throw new Error(error?.response?.data?.status?.error_message || error.message)
     }
@@ -174,12 +189,12 @@ const POPULAR_SYMBOLS = ['bitcoin', 'ethereum'] // use in other for same symbols
 
 
 module.exports = {
-    getCoingeckoHistoricalDataById,
     currentDate,
     getDateFromTimeAgo,
     validateCurrencySymbol,
     getCoingeckoHistoricalDataById,
     getDuneSimTokenInfo,
     getValidChainIds,
-    normaliseString
+    normaliseString,
+    usdFormatter
 }

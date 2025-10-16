@@ -1,6 +1,7 @@
 const axios = require('axios');
 const dotenv = require('dotenv');
-const { normaliseString } = require('../utils/price-helpers')
+const { normaliseString } = require('../utils/price-helpers');
+const { formatTimestamp, usdFormatter, numberFormatter, formatByDecimals } = require('./formatters');
 dotenv.config();  
   
   async function getBalanceViaDune(address, chains, time){
@@ -15,21 +16,22 @@ dotenv.config();
           })
           const { balances } = response.data
 
-          if(time){
-            for(let bal of balances){
-                bal['wallet_address'] = address
-                if(!bal.historical_prices) continue
-                for(let history of bal.historical_prices){
-                const key = "price_in_" + history.offset_hours +"h"
-                const price = bal.price_usd 
-                bal[key] = price
-                }
-                delete bal['historical_prices']
-            }
-          }
+          const result = balances.map((bal) => {
+            const returnValue = {}
+            returnValue.wallet_address = address
+            returnValue.name = bal.name
+            returnValue.chain = bal.chain
+            returnValue.token_balance = `${formatByDecimals(bal.amount, bal.decimals)} ${bal.symbol}`
+            returnValue.balance_usd = usdFormatter.format(bal.value_usd)
+            returnValue.price_usd = usdFormatter.format(bal.price_usd)
+            returnValue.token_address = bal.address
+            returnValue.pool_size = `${numberFormatter.format(bal.pool_size)} ${bal.symbol}`
+            returnValue.low_liquidity = bal.low_liquidity
+            return returnValue
+          })
 
 
-          return balances
+          return result
     } catch (error) {
           throw new Error(error?.response?.data?.message || error.message || 'Unexpected Error')
     }
@@ -64,7 +66,7 @@ dotenv.config();
 
   }
   async function getEthersScanTxList(addresses, time, chainId){
-    const {startBlock, endBlock} = time
+    const { startBlock, endBlock } = time
 
     const normalizedAddresses = normaliseString(addresses)
 
@@ -76,7 +78,17 @@ dotenv.config();
         const response = await axios(url)
         const { result } = response.data
         const resultData = result || []
-        data.push(...resultData)
+        if(!Array.isArray(resultData)){
+          throw new Error(result)
+        }
+        const values = resultData.map((item) =>  {
+          const timeStamp = item.timeStamp ? formatTimestamp(item.timeStamp) : null
+          return {
+            ...item,
+            timeStamp
+          }
+        })
+        data.push(...values)
     }
     return data
 

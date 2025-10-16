@@ -69,9 +69,9 @@ class ProxyService {
       ...headers,
     };
     if (process.env.COINGECKO_KEY_TYPE === "pro") {
-      headers["x_cg_pro_api_key"] = process.env.COINGECKO_API_KEY;
+      _headers["x_cg_pro_api_key"] = process.env.COINGECKO_API_KEY;
     } else {
-      headers["x-cg-demo-api-key"] = process.env.COINGECKO_API_KEY;
+      _headers["x-cg-demo-api-key"] = process.env.COINGECKO_API_KEY;
     }
     const response = await axios({
       method,

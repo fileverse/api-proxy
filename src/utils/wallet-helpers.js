@@ -16,7 +16,7 @@ dotenv.config();
           })
           const { balances } = response.data
 
-          const result = balances.map((bal) => {
+          const result = (balances || []).slice(0, 10).map((bal) => {
             const returnValue = {}
             returnValue.wallet_address = address
             returnValue.name = bal.name

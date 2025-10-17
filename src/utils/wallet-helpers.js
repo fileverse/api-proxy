@@ -81,7 +81,7 @@ dotenv.config();
         if(!Array.isArray(resultData)){
           throw new Error(result)
         }
-        const values = resultData.map((item) =>  {
+        const values = resultData.slice(0, 10).map((item) =>  {
           const timeStamp = item.timeStamp ? formatTimestamp(item.timeStamp) : null
           return {
             ...item,

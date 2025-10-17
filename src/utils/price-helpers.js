@@ -132,7 +132,7 @@ const POPULAR_SYMBOLS = ['bitcoin', 'ethereum'] // use in other for same symbols
   async function validateCurrencySymbol(coin){
       const coinQueryList = coin.split(',')
       const validSymbols = await getCoingeckoValidSymbols()
-      const invalidCoinSymbols = coinQueryList.filter((id) => !validSymbols.get(id))
+      const invalidCoinSymbols = coinQueryList.filter((id) => !validSymbols.get(id.toLowerCase()))
       return invalidCoinSymbols
   }
 
@@ -161,7 +161,7 @@ const POPULAR_SYMBOLS = ['bitcoin', 'ethereum'] // use in other for same symbols
 
   async function getCoingeckoHistoricalDataById (symbol, date) {
     try {
-          const id = cachedValidSymbols.get(symbol).id
+          const id = cachedValidSymbols.get(symbol.toLowerCase()).id
     
           if(!id){
             new Error('Invalid coin id')

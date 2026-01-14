@@ -3,7 +3,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const ALLOWED_SOURCE_APPS_MAP = {
-  ddocs: "ddoc",
+  ddoc: "ddoc",
   dsheet: "dsheet",
 };
 
@@ -13,7 +13,7 @@ const validateSourceApp = (sourceApp) => {
 };
 
 const getAllowedGatewayUrls = (sourceApp) => {
-  if (sourceApp === ALLOWED_SOURCE_APPS_MAP.ddocs) {
+  if (sourceApp === ALLOWED_SOURCE_APPS_MAP.ddoc) {
     return process.env.ALLOWED_DDOCS_GATEWAY.split(",");
   }
   if (sourceApp === ALLOWED_SOURCE_APPS_MAP.dsheet) {

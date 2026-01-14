@@ -26,9 +26,6 @@ const validateTargetUrl = (targetUrl, sourceApp) => {
   const parsedURL = new URL(targetUrl);
   const allowedGatewayUrls = getAllowedGatewayUrls(sourceApp);
 
-  if (!allowedGatewayUrls.includes(parsedURL.origin))
-    throw new Error("Target URL is not allowed");
-
   const ipfsHash = parsedURL.pathname.split("/").pop();
   const targetUrls = allowedGatewayUrls.map(
     (gateway) => `${gateway}/ipfs/${ipfsHash}`

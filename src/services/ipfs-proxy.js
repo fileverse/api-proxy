@@ -29,14 +29,32 @@ const validateTargetUrl = (targetUrl, sourceApp) => {
   if (!allowedGatewayUrls.includes(parsedURL.origin))
     throw new Error("Target URL is not allowed");
 
-  return targetUrl;
+  const ipfsHash = parsedURL.pathname.split("/").pop();
+  const targetUrls = allowedGatewayUrls.map(
+    (gateway) => `${gateway}/ipfs/${ipfsHash}`
+  );
+  return targetUrls;
+};
+
+const fetchFromMultipleUrls = async (targetUrls) => {
+  for (const targetUrl of targetUrls) {
+    try {
+      const response = await fetch(targetUrl);
+      if (response.status === 200) {
+        return response;
+      }
+    } catch (error) {
+      console.error(`Error fetching from ${targetUrl}:`, error);
+    }
+  }
+  throw new Error("All requests failed");
 };
 
 const forwardIPFSRequest = async (targetUrl, sourceApp) => {
   validateSourceApp(sourceApp);
-  const validatedTargetUrl = validateTargetUrl(targetUrl, sourceApp);
+  const validatedTargetUrls = validateTargetUrl(targetUrl, sourceApp);
 
-  const response = await fetch(validatedTargetUrl);
+  const response = await fetchFromMultipleUrls(validatedTargetUrls);
 
   // Filter out problematic headers that shouldn't be forwarded
   const skipHeaders = new Set([
